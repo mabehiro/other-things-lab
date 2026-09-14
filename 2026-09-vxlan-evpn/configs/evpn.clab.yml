@@ -1,0 +1,55 @@
+name: evpn-lab
+
+topology:
+  nodes:
+    br-underlay:
+      kind: bridge
+
+    spine1:
+      kind: linux
+      image: frrouting/frr:latest
+      binds:
+        - spine1/daemons:/etc/frr/daemons
+        - spine1/frr.conf:/etc/frr/frr.conf
+        - spine1/vtysh.conf:/etc/frr/vtysh.conf
+      exec:
+        - ip addr add 192.168.30.2/24 dev eth1
+
+    leaf1:
+      kind: linux
+      image: frrouting/frr:latest
+      binds:
+        - leaf1/daemons:/etc/frr/daemons
+        - leaf1/frr.conf:/etc/frr/frr.conf
+        - leaf1/vtysh.conf:/etc/frr/vtysh.conf
+      exec:
+        - ip addr add 192.168.30.11/24 dev eth1
+
+    leaf2:
+      kind: linux
+      image: frrouting/frr:latest
+      binds:
+        - leaf2/daemons:/etc/frr/daemons
+        - leaf2/frr.conf:/etc/frr/frr.conf
+        - leaf2/vtysh.conf:/etc/frr/vtysh.conf
+      exec:
+        - ip addr add 192.168.30.12/24 dev eth1
+
+    host-a:
+      kind: linux
+      image: wbitt/network-multitool
+      exec:
+        - ip addr add 192.168.40.10/24 dev eth1
+
+    host-b:
+      kind: linux
+      image: wbitt/network-multitool
+      exec:
+        - ip addr add 192.168.40.11/24 dev eth1
+
+  links:
+    - endpoints: [ "spine1:eth1", "br-underlay:spine1" ]
+    - endpoints: [ "leaf1:eth1",  "br-underlay:leaf1"  ]
+    - endpoints: [ "leaf2:eth1",  "br-underlay:leaf2"  ]
+    - endpoints: [ "leaf1:eth2",  "host-a:eth1" ]
+    - endpoints: [ "leaf2:eth2",  "host-b:eth1" ]

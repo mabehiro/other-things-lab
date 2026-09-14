@@ -1,0 +1,18 @@
+                    spine1  192.168.30.2
+                 (BGP route reflector, AS 65000)
+                          │
+                    underlay VLAN
+                          │
+              ┌───────────┴───────────┐
+              │                       │
+           leaf1                    leaf2
+       192.168.30.11            192.168.30.12
+           VTEP                     VTEP
+              │                       │
+              └────── VXLAN VNI 100 ──┘
+                      UDP 4789
+              │                       │
+           host-a                  host-b
+        192.168.40.10           192.168.40.11
+
+        └──── one subnet, no L2 path between them ────┘

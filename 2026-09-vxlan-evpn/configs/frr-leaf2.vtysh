@@ -1,0 +1,22 @@
+! leaf2 -- VTEP, AS 65000
+! Typed into vtysh. Finish each block with `end` then `write memory`.
+! Note there is no `vni 100`, no `rd` and no `route-target` anywhere below:
+! the VXLAN device is created in the kernel (see vxlan-leaf2.sh), zebra finds
+! it over netlink, and `advertise-all-vni` advertises whatever zebra found.
+! FRR derives the RD and RT itself.
+
+conf t
+router bgp 65000
+ bgp router-id 192.168.30.12
+ neighbor 192.168.30.2 remote-as 65000
+end
+write memory
+
+conf t
+router bgp 65000
+ address-family l2vpn evpn
+  neighbor 192.168.30.2 activate
+  advertise-all-vni
+ exit-address-family
+end
+write memory

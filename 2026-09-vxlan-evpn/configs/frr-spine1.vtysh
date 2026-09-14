@@ -1,0 +1,23 @@
+! spine1 -- BGP route reflector, AS 65000
+! Typed into vtysh. Finish each block with `end` then `write memory`:
+! /etc/frr/frr.conf holds only `hostname spineN` until write memory runs,
+! and anything typed into vtysh lives in RAM until then.
+
+conf t
+router bgp 65000
+ bgp router-id 192.168.30.2
+ neighbor FABRIC peer-group
+ neighbor FABRIC remote-as 65000
+ neighbor 192.168.30.11 peer-group FABRIC
+ neighbor 192.168.30.12 peer-group FABRIC
+end
+write memory
+
+conf t
+router bgp 65000
+ address-family l2vpn evpn
+  neighbor FABRIC activate
+  neighbor FABRIC route-reflector-client
+ exit-address-family
+end
+write memory

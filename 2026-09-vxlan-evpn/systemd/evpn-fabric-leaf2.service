@@ -1,0 +1,35 @@
+# /etc/systemd/system/evpn-fabric.service on leaf2
+#
+# The VXLAN dataplane is kernel state, not FRR config, so it does not survive
+# a reboot on its own: the leaf comes back with BGP established and frr.conf
+# intact, and no vxlan100 at all.
+#
+# Do NOT add Before=frr.service. frr.service declares Before=network.target,
+# which closes the loop evpn-fabric -> network-online.target -> network.target
+# -> frr.service -> evpn-fabric. systemd breaks an ordering cycle by deleting
+# one job and picks a different victim per host: on 2026-08-27 leaf1 lost this
+# unit entirely -- it reported 'enabled', never ran, and nothing was marked
+# failed -- while leaf2 came up fine from an identical file.
+# It is also unnecessary: zebra discovers VXLAN devices whenever they appear.
+[Unit]
+Description=EVPN VXLAN dataplane
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+Environment=UP=ens19
+ExecStart=-/sbin/ip link add vxlan100 type vxlan id 100 dstport 4789 local 192.168.30.12 nolearning
+ExecStart=-/sbin/ip link add br100 type bridge
+ExecStart=/sbin/ip link set vxlan100 master br100
+ExecStart=/sbin/ip link set ${UP} master br100
+ExecStart=/sbin/ip link set vxlan100 mtu 1450
+ExecStart=/sbin/ip link set br100 mtu 1450
+ExecStart=/sbin/ip link set ${UP} mtu 1450
+ExecStart=/sbin/ip link set vxlan100 up
+ExecStart=/sbin/ip link set br100 up
+ExecStart=/sbin/ip link set ${UP} up
+
+[Install]
+WantedBy=multi-user.target
