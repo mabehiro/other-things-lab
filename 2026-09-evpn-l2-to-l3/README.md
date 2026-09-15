@@ -33,13 +33,17 @@ than as fragments because they have to exist whole on the machine:
 | Path | What |
 |---|---|
 | `configs/frr-l3-vrf.vtysh` | the `vrf tenant-a` / `vni 101` binding and `router bgp … vrf tenant-a` |
-| `configs/anycast-svi-leaf1.sh` | `br100` gets the gateway address and joins the VRF (leaf2 is identical) |
 | `configs/host-default-route.sh` | `host-a` and `host-b` finally get a default route |
 | `configs/99-evpn-unmanaged.conf` | NetworkManager exclusion, now four interfaces |
-| `systemd/evpn-fabric-leaf1.service` | complete unit — recreates all five devices at boot |
+| `systemd/evpn-fabric-leaf1.service` | complete unit — recreates all five devices **and the anycast SVI** at boot |
 
-Order: FRR VRF block → L3 devices (the systemd unit, or by hand) → anycast SVI →
-host default routes.
+Order: FRR VRF block → `systemctl start evpn-fabric` → host default routes.
+
+The unit does the whole dataplane, including giving `br100` its gateway address
+and enslaving it to the VRF. Those three commands are kernel state exactly like
+the device creation, so keeping them anywhere else means a rebooted leaf comes
+back with the L2 fabric working, no gateway, no connected route in the VRF, and
+no Type-5 originated — with nothing reporting an error.
 
 ## The one that is easy to miss
 

@@ -44,5 +44,13 @@ ExecStart=/sbin/ip link set br101 mtu 1450
 ExecStart=/sbin/ip link set vxlan101 up
 ExecStart=/sbin/ip link set br101 up
 
+# ---- the anycast gateway: same IP and same MAC on BOTH leaves ----
+# This is kernel state too, so it belongs here rather than in a script run
+# by hand: without it a rebooted leaf comes back with the L2 fabric working
+# and no gateway, no connected route in the VRF, and no Type-5 originated.
+ExecStart=/sbin/ip link set br100 address 02:00:00:40:00:01
+ExecStart=-/sbin/ip addr add 192.168.40.1/24 dev br100
+ExecStart=/sbin/ip link set br100 master tenant-a
+
 [Install]
 WantedBy=multi-user.target
