@@ -27,21 +27,6 @@ other-things-lab/
 └── ...
 ```
 
-## The rule that matters
-
-**Each directory is frozen at the state used for its post.** It is not a
-mirror of my current homelab, and it does not get updated when the lab moves
-on.
-
-This matters more than it sounds. The fabric in `2026-09-vxlan-evpn/` was
-extended from L2 to L3 within a few weeks of that post going up. Had these
-files tracked the live lab, they would now describe something the post never
-tested — and anyone following along would be debugging a mismatch that was my
-fault, not theirs.
-
-So older experiments are left alone. If a later experiment changes something,
-it gets its own directory.
-
 ## Use it however you like
 
 Apache-2.0 — see [LICENSE](LICENSE). Copy it, adapt it, build on it. No
