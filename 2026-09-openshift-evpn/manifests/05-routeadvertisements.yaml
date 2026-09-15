@@ -1,0 +1,18 @@
+apiVersion: k8s.ovn.org/v1
+kind: RouteAdvertisements
+metadata:
+  name: advertise-tenant-a
+spec:
+  networkSelectors:
+    - networkSelectionType: ClusterUserDefinedNetworks
+      clusterUserDefinedNetworkSelector:
+        networkSelector:
+          matchLabels:
+            k8s.ovn.org/metadata.name: cudn-tenant-a
+  nodeSelector: {}
+  frrConfigurationSelector:
+    matchLabels:
+      name: evpn-fabric-peering
+  advertisements:
+    - PodNetwork
+  targetVRF: auto

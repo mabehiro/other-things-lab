@@ -1,0 +1,22 @@
+apiVersion: k8s.ovn.org/v1
+kind: ClusterUserDefinedNetwork
+metadata:
+  name: cudn-tenant-a
+  labels:
+    k8s.ovn.org/metadata.name: cudn-tenant-a   # REQUIRED — nothing adds this for you
+spec:
+  namespaceSelector:
+    matchLabels:
+      udn-tenant: tenant-a
+  network:
+    topology: Layer3
+    transport: EVPN
+    evpn:
+      vtep: evpn-vtep
+      ipVRF:
+        vni: 101           # MUST match the fabric's tenant L3 VNI
+    layer3:
+      role: Primary
+      subnets:
+        - cidr: 192.168.48.0/22
+          hostSubnet: 24

@@ -1,0 +1,17 @@
+apiVersion: frrk8s.metallb.io/v1beta1
+kind: FRRConfiguration
+metadata:
+  name: evpn-fabric-peering
+  namespace: openshift-frr-k8s
+  labels:
+    name: evpn-fabric-peering
+spec:
+  bgp:
+    routers:
+      - asn: 65000
+        neighbors:
+          - address: 192.168.30.2      # spine1, the route reflector
+            asn: 65000
+            toReceive: { allowed: { mode: all } }
+            toAdvertise: { allowed: { mode: all } }
+  nodeSelector: {}

@@ -1,0 +1,8 @@
+apiVersion: k8s.ovn.org/v1
+kind: VTEP
+metadata:
+  name: evpn-vtep
+spec:
+  mode: Unmanaged          # enum: Managed | Unmanaged · defaults to Managed
+  cidrs:
+    - 192.168.30.0/24      # a DISCOVERY range, not a per-node list

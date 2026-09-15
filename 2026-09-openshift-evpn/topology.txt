@@ -1,0 +1,10 @@
+                        spine1  192.168.30.2
+                     (BGP route reflector)
+         ┌───────────────┬────────┬────────┬───────────────┐
+         │               │        │        │               │
+      leaf1           leaf2     cp1      cp2             cp3
+   192.168.30.11   .30.12    .30.21   .30.22          .30.23
+      VTEP           VTEP     VTEP     VTEP            VTEP
+        │              │        └────────┴───────────────┘
+     host-a         host-b            OCP nodes —
+    .40.10          .40.11        each its own VTEP/PE
