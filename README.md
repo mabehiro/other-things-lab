@@ -41,3 +41,12 @@ fault, not theirs.
 
 So older experiments are left alone. If a later experiment changes something,
 it gets its own directory.
+
+## Use it however you like
+
+Apache-2.0 — see [LICENSE](LICENSE). Copy it, adapt it, build on it. No
+attribution beyond what the licence already asks for.
+
+These are lab configs. They ran on my hardware, against the versions noted in
+each experiment's README, and they carry no warranty of any kind. Read them
+before you run them.
