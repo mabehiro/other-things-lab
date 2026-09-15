@@ -1,0 +1,28 @@
+! Applied on BOTH leaves, identical apart from nothing -- the VRF and
+! its L3 VNI are the same on leaf1 and leaf2.
+!
+! Builds on ../2026-09-vxlan-evpn/configs/frr-leafN.vtysh -- apply that first.
+!
+! redistribute connected is the line that is easy to miss: advertise ipv4
+! unicast exports what is in BGP's table for the VRF, and a connected route
+! lives in the kernel's table until something puts it into BGP. Without it
+! no Type-5 route is ever originated and nothing reports an error.
+
+configure terminal
+!
+vrf tenant-a
+ vni 101
+exit-vrf
+!
+router bgp 65000 vrf tenant-a
+ !
+ address-family ipv4 unicast
+  redistribute connected
+ exit-address-family
+ !
+ address-family l2vpn evpn
+  advertise ipv4 unicast
+ exit-address-family
+!
+end
+write memory
