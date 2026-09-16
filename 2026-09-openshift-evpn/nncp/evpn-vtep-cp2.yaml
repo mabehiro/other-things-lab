@@ -1,0 +1,22 @@
+# U-3 · VTEP loopback for ocp-evpn-cp2. See evpn-vtep-cp1.yaml for the why.
+# enp6s19 keeps 192.168.30.22/24 — peering address and physical path.
+apiVersion: nmstate.io/v1
+kind: NodeNetworkConfigurationPolicy
+metadata:
+  name: evpn-vtep-cp2
+spec:
+  nodeSelector:
+    kubernetes.io/hostname: ocp-evpn-cp2
+  desiredState:
+    interfaces:
+      - name: evpn-vtep0
+        type: dummy
+        state: up
+        ipv4:
+          enabled: true
+          address:
+            - ip: 192.168.31.22
+              prefix-length: 32
+          dhcp: false
+        ipv6:
+          enabled: false

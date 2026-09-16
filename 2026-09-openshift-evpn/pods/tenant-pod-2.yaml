@@ -1,0 +1,34 @@
+# U-3 · a second tenant pod, on a DIFFERENT node from tenant-pod.
+#
+# Why it exists: the VTEP loopback move (2026-09-15) broke node-to-node VXLAN
+# silently — cp1 had no route to 192.168.31.22 and fell through to the default
+# route via br-ex. The pod → host-a money shot does NOT exercise that path:
+# it only ever goes node → leaf1. This pod does.
+#
+# tenant-pod is on ocp-evpn-cp1 (192.168.48.4). This one lands on cp2, whose
+# per-node subnet is 192.168.49.0/24 — the prefix that was unreachable during
+# the failure window.
+#
+#   oc apply -f tenant-pod-2.yaml
+#   oc get pods -n tenant-a -o wide          # two different nodes
+#   oc rsh -n tenant-a tenant-pod-2 ip -4 addr   # ovn-udn1 should be 192.168.49.x
+#   oc rsh -n tenant-a tenant-pod ping -c 5 <that address>
+#
+# ⚠️ `oc get pod -o wide` reports the DEFAULT-network IP (10.130.x), not the CUDN
+#    address. Read ovn-udn1 inside the pod, not the IP column.
+#
+# nodeName pins the node and bypasses the scheduler — deliberate, same as U-1's
+# pods.yaml, where the first attempt put both pods on one node and proved nothing.
+#
+# IMAGE: rhel9/support-tools — has ping, nc, tcpdump, curl. ubi9/ubi has NO ping.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: tenant-pod-2
+  namespace: tenant-a
+spec:
+  nodeName: ocp-evpn-cp2
+  containers:
+    - name: c
+      image: registry.redhat.io/rhel9/support-tools
+      command: ["sleep", "infinity"]

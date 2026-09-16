@@ -1,0 +1,39 @@
+# U-3 · VTEP loopback for ocp-evpn-cp1.
+#
+# Shape from OCP 4.22 "Advanced networking" §8.1.2, step 2.a.i (p. 94-95).
+# The docs' own reason for a dummy rather than the NIC:
+#   "Avoid using an interface associated with a physical link carrier when using
+#    redundant BGP peering. Instead, use a dummy interface where the IP is
+#    configured as the primary address."
+#
+# ⚠️ ONE POLICY PER NODE. The address differs per node and nodeSelector is the
+#    only way to vary it — a single policy would put the same /32 on all three
+#    and break VTEP discovery everywhere at once.
+#
+# ⚠️ The node must end up with EXACTLY ONE address inside the VTEP CIDR
+#    (192.168.31.0/24). More than one and the VTEP goes to a failed status.
+#
+# 🚩 enp6s19 keeps 192.168.30.21/24. It is still the BGP peering address and
+#    still the physical path to the fabric — only the VTEP identity moves here.
+#
+# Validate before applying:  nmstatectl gc <this file's desiredState>
+apiVersion: nmstate.io/v1
+kind: NodeNetworkConfigurationPolicy
+metadata:
+  name: evpn-vtep-cp1
+spec:
+  nodeSelector:
+    kubernetes.io/hostname: ocp-evpn-cp1
+  desiredState:
+    interfaces:
+      - name: evpn-vtep0
+        type: dummy
+        state: up
+        ipv4:
+          enabled: true
+          address:
+            - ip: 192.168.31.21
+              prefix-length: 32
+          dhcp: false
+        ipv6:
+          enabled: false

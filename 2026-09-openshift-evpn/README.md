@@ -34,11 +34,31 @@ an error — it produces objects that sit pending and blame each other.
 | File | What |
 |---|---|
 | `00-enable-frr-k8s.sh` | enables FRR-K8s and route advertisement; the CRDs below do not exist without it |
+| `nncp/evpn-vtep-cp*.yaml` | one dummy `/32` loopback per node — apply before the `VTEP` CR |
 | `01-vtep.yaml` | before the CUDN — missing, and the NetworkAttachmentDefinition never renders |
 | `02-cudn.yaml` | the tenant network. `transport` and `evpn` are siblings of `topology`, not children of `layer3` |
 | `03-namespace.yaml` | both labels must be present **at creation** — see below |
 | `04-frrconfiguration.yaml` | peers at the spine (route reflector), cluster ASN equal to the fabric's |
 | `05-routeadvertisements.yaml` | `targetVRF` is mandatory and the CRD does not say so |
+| `configs/frr-spine1-running.conf` | the fabric's route reflector, as it stands — including the `ipv4 unicast` reflection |
+| `pods/tenant-pod.yaml` | a pod on the tenant network — nothing advertises a pod subnet until one exists |
+| `pods/tenant-pod-2.yaml` | a second pod on a **different** node, for the pod-to-pod path |
+
+## The VTEP goes on a dummy interface
+
+OCP 4.22 *Advanced networking* §8.1.2: *"Avoid using an interface associated with a physical link carrier when using redundant BGP
+peering. Instead, use a dummy interface where the IP is configured as the primary address."*
+
+`nncp/` provisions `evpn-vtep0` with a single `/32` on each node, and `01-vtep.yaml` points `cidrs` at that range. The node's real NIC
+keeps its own address — it is still the BGP peering address and still the physical path. Only the VTEP identity moves, because a VXLAN
+device binds to a source address rather than to an interface.
+
+**One policy per node.** The address differs per node and `nodeSelector` is the only way to vary it; a single policy would put the same
+`/32` on all three. Each node must end up with **exactly one** address inside the VTEP CIDR, or the `VTEP` goes to a failed status.
+
+⚠️ **The fabric must carry the loopback range.** OVN-Kubernetes advertises the VTEP IP on the underlay, but the fabric has to be
+configured to receive it — the `/32`s need reflecting in `address-family ipv4 unicast`, not only in `l2vpn evpn`. While the VTEPs sit on
+a connected subnet this is invisible; it is fatal the moment one moves off-subnet.
 
 ## Four things that cost time
 
@@ -60,6 +80,16 @@ host a primary network. It must be there when the namespace is created.
 **`targetVRF: auto` is mandatory.** The CRD gives a free-form string, no enum, no
 validation, and one line of description that does not say it is required. You
 cannot even see the error until the selector above matches something.
+
+## Testing it
+
+`pods/tenant-pod.yaml` is enough for pod → `host-a`. Add `pods/tenant-pod-2.yaml` for pod → pod across nodes, which is a
+**different path**: the two nodes are L2-adjacent, so that VXLAN goes VTEP to VTEP directly and the leaves are not in the
+data path at all. A working pod → `host-a` ping proves nothing about it.
+
+Both pin `nodeName` deliberately — the scheduler will otherwise put both pods on one node and the test proves nothing.
+
+⚠️ `oc get pod -o wide` reports the **default-network** address, not the CUDN one. Read `ovn-udn1` from inside the pod.
 
 ## Versions
 

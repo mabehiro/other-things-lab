@@ -66,16 +66,17 @@ can change underneath you.
 That is the reasoning for doing it. It was not tested by setting the leaves
 differently and watching it break.
 
-## What is not here, and why
+## These were read back off the machine
 
-**There is no `show run` snapshot and no `systemctl cat` output.** The FRR block
-and the systemd units are the configuration as applied, not as read back off the
-machine. Neither `vtysh -c 'show run'` nor `systemctl cat evpn-fabric` has been
-captured.
+Both sides have now been read back off the machine. `systemctl cat evpn-fabric` on
+leaf2 matches the unit here line for line — 23 `ExecStart` lines, same order,
+including the three that give `br100` its gateway address and put it in the VRF.
 
-Unlike the L2-only fabric in the previous directory — which no longer exists and
-can never be snapshotted — **this state is live**, so both captures are still
-possible. They belong here when taken.
+The FRR side likewise: `configs/frr-leaf1-running.conf` and
+`frr-leaf2-running.conf` are `show running-config` dumps taken 2026-09-16. Worth
+reading for what is *absent* — there is no `vni 100`, no `rd` and no
+`route-target` anywhere in them. The VXLAN devices are kernel state, and FRR
+derives the route distinguisher and route target itself.
 
 ## Versions
 

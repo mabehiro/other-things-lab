@@ -3,6 +3,7 @@ kind: VTEP
 metadata:
   name: evpn-vtep
 spec:
-  mode: Unmanaged          # enum: Managed | Unmanaged · defaults to Managed
+  mode: Unmanaged          # Managed is UNSUPPORTED in 4.22 (Advanced networking §8.1.2 p.94),
+                           # and Managed is the default -- so this line is not optional
   cidrs:
-    - 192.168.30.0/24      # a DISCOVERY range, not a per-node list
+    - 192.168.31.0/24      # a DISCOVERY range over the dummy loopbacks, not a per-node list

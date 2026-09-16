@@ -3,7 +3,7 @@ kind: ClusterUserDefinedNetwork
 metadata:
   name: cudn-tenant-a
   labels:
-    k8s.ovn.org/metadata.name: cudn-tenant-a   # REQUIRED — nothing adds this for you
+    k8s.ovn.org/metadata.name: cudn-tenant-a   # REQUIRED — nothing adds this automatically
 spec:
   namespaceSelector:
     matchLabels:

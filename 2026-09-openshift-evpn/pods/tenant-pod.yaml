@@ -1,0 +1,22 @@
+# U-3 · the tenant pod used for the pod -> host-a test.
+#
+# Nothing advertises a pod subnet until a pod exists on it.
+#
+# IMAGE: rhel9/support-tools -- has ping, nc, tcpdump, curl.
+# ubi9/ubi ships NO ping and NO nc, which strands you halfway through
+# the verification.
+#
+# nodeName pins the node and bypasses the scheduler -- deliberate, so the
+# pod lands where the capture is being taken.
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: tenant-pod
+  namespace: tenant-a          # membership comes from the NAMESPACE — a Primary network needs no annotation
+spec:
+  nodeName: ocp-evpn-cp1
+  containers:
+    - name: c
+      image: registry.redhat.io/rhel9/support-tools
+      command: ["sleep", "infinity"]
