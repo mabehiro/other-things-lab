@@ -1,0 +1,13 @@
+# The VM's namespace. Both labels must be present at creation:
+# k8s.ovn.org/primary-user-defined-network is enforced on UPDATE only, so
+# adding it later is denied and the namespace can never host a primary network.
+#
+# udn-tenant: vm-a is deliberately not tenant-a. A namespace can have only one
+# primary network, and cudn-tenant-a already selects udn-tenant: tenant-a.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vm-a
+  labels:
+    udn-tenant: vm-a
+    k8s.ovn.org/primary-user-defined-network: ""

@@ -1,0 +1,40 @@
+# A Layer2 EVPN network on the fabric's existing segment: 192.168.40.0/24,
+# MAC-VRF VNI 100, the same L2 domain as host-a and host-b. The VM reaches
+# them by bridging.
+#
+# There is no ipVRF. VNI 101 is the fabric's tenant VRF, and cudn-tenant-a
+# (2026-09-openshift-evpn) already holds it; a VNI is reserved by one network
+# per VTEP. Without an ipVRF this segment has no routed path off the subnet.
+#
+# spec is immutable. The subnet, VNI, fence, gateway and MTU are fixed at
+# creation; changing any of them means deleting this and the namespace.
+apiVersion: k8s.ovn.org/v1
+kind: ClusterUserDefinedNetwork
+metadata:
+  name: cudn-vm-a
+  labels:
+    k8s.ovn.org/metadata.name: cudn-vm-a   # REQUIRED; the RouteAdvertisements selects on it and nothing adds it
+spec:
+  namespaceSelector:
+    matchLabels:
+      udn-tenant: vm-a
+  network:
+    topology: Layer2
+    transport: EVPN
+    evpn:
+      vtep: evpn-vtep
+      macVRF:
+        vni: 100                 # the VNI the leaves already bridge for 192.168.40.0/24
+        routeTarget: "65000:100"
+    layer2:
+      role: Primary
+      subnets:               ["192.168.40.0/24"]
+      infrastructureSubnets: ["192.168.40.0/29"]   # .0-.7, must contain the gateway
+      defaultGatewayIPs:     ["192.168.40.1"]      # the fabric's anycast gateway; see the post: both answer ARP for it
+      reservedSubnets:                             # kept away from the allocator:
+        - "192.168.40.8/29"                        #   .8-.15, host-a .10 and host-b .11
+        - "192.168.40.16/28"                       #   .16-.31, room for more fabric hosts
+      ipam:
+        mode: Enabled
+        lifecycle: Persistent    # keeps the VM's IP across live migration
+      mtu: 1400

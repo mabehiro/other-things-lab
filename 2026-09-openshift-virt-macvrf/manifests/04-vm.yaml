@@ -1,0 +1,70 @@
+# The VM. It gets 192.168.40.32 or above, because .0-.31 is fenced off.
+#
+# The disk is RWX: live migration needs shared storage. nfs-navy is this lab's
+# RWX storage class; use your own.
+#
+# The l2bridge binding is registered by default on OpenShift Virtualization
+# 4.22; it is listed in the KubeVirt CR under spec.configuration.network.
+#
+# Set a password before applying, from a copy outside any repo.
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: vm-a1
+  namespace: vm-a
+spec:
+  runStrategy: Always
+  dataVolumeTemplates:
+    - metadata:
+        name: vm-a1-root
+      spec:
+        sourceRef:
+          kind: DataSource
+          name: centos-stream9
+          namespace: openshift-virtualization-os-images
+        storage:
+          accessModes:
+            - ReadWriteMany
+          resources:
+            requests:
+              storage: 30Gi
+          storageClassName: nfs-navy
+  template:
+    metadata:
+      labels:
+        kubevirt.io/domain: vm-a1
+    spec:
+      evictionStrategy: LiveMigrate
+      domain:
+        cpu:
+          cores: 2
+        memory:
+          guest: 2Gi
+        devices:
+          disks:
+            - name: rootdisk
+              disk:
+                bus: virtio
+            - name: cloudinit
+              disk:
+                bus: virtio
+          interfaces:
+            - name: default
+              binding:
+                name: l2bridge
+      networks:
+        - name: default
+          pod: {}                # a primary user-defined network is still attached as pod: {}
+      volumes:
+        - name: rootdisk
+          dataVolume:
+            name: vm-a1-root
+        - name: cloudinit
+          cloudInitNoCloud:
+            userData: |
+              #cloud-config
+              user: cloud-user
+              password: <SET-ME>
+              chpasswd: { expire: False }
+              packages:
+                - iputils

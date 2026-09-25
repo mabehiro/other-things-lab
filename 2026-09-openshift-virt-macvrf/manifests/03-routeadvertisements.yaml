@@ -1,0 +1,24 @@
+# A second RouteAdvertisements, not an edit to advertise-tenant-a. Both reuse
+# the one FRRConfiguration, because the BGP session to spine1 is per node.
+#
+# It is required even though this network has nothing to route: an EVPN
+# network with no RouteAdvertisements reports TransportAccepted False
+# (EVPNRouteAdvertisementsIsMissing). targetVRF: auto is accepted with no ipVRF.
+apiVersion: k8s.ovn.org/v1
+kind: RouteAdvertisements
+metadata:
+  name: advertise-vm-a
+spec:
+  networkSelectors:
+    - networkSelectionType: ClusterUserDefinedNetworks
+      clusterUserDefinedNetworkSelector:
+        networkSelector:
+          matchLabels:
+            k8s.ovn.org/metadata.name: cudn-vm-a
+  nodeSelector: {}
+  frrConfigurationSelector:
+    matchLabels:
+      name: evpn-fabric-peering
+  advertisements:
+    - PodNetwork
+  targetVRF: auto

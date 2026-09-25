@@ -1,0 +1,13 @@
+                        spine1  192.168.30.2
+                     (BGP route reflector)
+         ┌───────────────┬────────┬────────┬───────────────┐
+         │               │        │        │               │
+      leaf1           leaf2     cp1      cp2             cp3
+   192.168.30.11   .30.12    VTEP     VTEP            VTEP
+      VTEP           VTEP    .31.21   .31.22          .31.23
+        │              │        └────────┴───────────────┘
+     host-a         host-b        vm-a1 192.168.40.32
+    .40.10          .40.11        live-migrates between nodes
+
+   One L2 segment, 192.168.40.0/24, MAC-VRF VNI 100:
+   host-a and host-b behind the leaves, vm-a1 on the cluster.
