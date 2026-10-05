@@ -5,7 +5,7 @@ subnet and a MAC-VRF with two plain hosts behind the fabric's leaves. It
 live-migrates between nodes and keeps its IP and MAC; the fabric sees an EVPN
 MAC move.
 
-Post: **Live-migrating a VM across an EVPN fabric** — https://otherthings.cloud/posts/live-migrating-a-vm-across-an-evpn-fabric/
+Post: **Live-Migrating an OpenShift Virtualization VM Across an EVPN MAC-VRF** — https://otherthings.cloud/posts/live-migrating-a-vm-across-an-evpn-fabric/
 
 ```
 MAC-VRF VNI 100 / RT 65000:100 · 192.168.40.0/24 · no IP-VRF
