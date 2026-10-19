@@ -1,0 +1,24 @@
+# Advertise network A's per-node pod /24s to spine1.
+#
+# The CUDN's TransportAccepted condition stays False ("No RouteAdvertisements CR
+# is advertising the pod networks") until this exists. That is expected.
+#
+# No targetVRF, unlike the EVPN post: the routes go to the default VRF as plain
+# IPv4 unicast.
+apiVersion: k8s.ovn.org/v1
+kind: RouteAdvertisements
+metadata:
+  name: advertise-nooverlay-a
+spec:
+  nodeSelector: {}                       # all nodes
+  frrConfigurationSelector:
+    matchLabels:
+      network: nooverlay-a
+  networkSelectors:
+    - networkSelectionType: ClusterUserDefinedNetworks
+      clusterUserDefinedNetworkSelector:
+        networkSelector:
+          matchLabels:
+            network: nooverlay-a
+  advertisements:
+    - PodNetwork

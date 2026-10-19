@@ -1,0 +1,21 @@
+# NoOverlay network B: a twin of 02-cudn.yaml with its own name, selector and
+# subnet. Both networks end up in spine1's one default table. The question is
+# whether they can still reach each other. They couldn't: 0/5 in every direction.
+apiVersion: k8s.ovn.org/v1
+kind: ClusterUserDefinedNetwork
+metadata:
+  name: cudn-nooverlay-b
+  labels:
+    network: nooverlay-b                 # selected by 09-routeadvertisements-b.yaml
+spec:
+  namespaceSelector:
+    matchLabels:
+      udn-nooverlay: b
+  network:
+    topology: Layer3
+    layer3:
+      role: Primary
+      subnets:
+        - cidr: 192.168.56.0/22          # masked: 56 is a multiple of 4
+          hostSubnet: 24
+    transport: "NoOverlay"

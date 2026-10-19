@@ -1,0 +1,10 @@
+# The namespace for a SECOND NoOverlay network, B, used for the isolation test.
+# Same rule as 01: the primary-UDN label must be there at creation.
+# Its own selector label, so network A doesn't select it.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nooverlay-b
+  labels:
+    udn-nooverlay: b                                  # selected by 07-cudn-b.yaml
+    k8s.ovn.org/primary-user-defined-network: ""

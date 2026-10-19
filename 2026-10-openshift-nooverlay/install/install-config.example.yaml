@@ -1,0 +1,44 @@
+# Compact three-node OpenShift 4.22.11, agent-based install.
+# Fill in pullSecret and sshKey, and save it as install-config.yaml. The installer
+# consumes and deletes install-config.yaml, so keep this example as the source.
+#
+# featureSet: TechPreviewNoUpgrade enables NoOverlayMode. It cannot be undone
+# and blocks minor-version updates, which is why this is a separate, disposable
+# cluster.
+#
+# The lab installed from a local mirror registry with its own CA. The
+# imageDigestSources and additionalTrustBundle for that are left out. Add your
+# own if you install disconnected.
+apiVersion: v1
+baseDomain: navy.cotton.blue
+metadata:
+  name: ocp-nooverlay
+
+featureSet: TechPreviewNoUpgrade
+
+compute:
+  - name: worker
+    replicas: 0
+controlPlane:
+  name: master
+  replicas: 3
+
+networking:
+  networkType: OVNKubernetes
+  clusterNetwork:
+    - cidr: 10.128.0.0/14                # the default network, which stays on Geneve
+      hostPrefix: 23
+  machineNetwork:
+    - cidr: 192.168.20.0/24              # VLAN 20, the primary NIC (br-ex)
+  serviceNetwork:
+    - 172.30.0.0/16
+
+platform:
+  baremetal:
+    apiVIPs:
+      - 192.168.20.50
+    ingressVIPs:
+      - 192.168.20.54
+
+pullSecret: '<your pull secret>'
+sshKey: '<your ssh public key>'

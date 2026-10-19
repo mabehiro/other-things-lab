@@ -1,0 +1,85 @@
+# Four test pods: two on NoOverlay network A, two on the default (Geneve)
+# network, each pair pinned to DIFFERENT nodes so the traffic has to cross the
+# underlay. The Geneve pair is the comparison on the wire.
+#
+# nodeName is set on purpose. Left to the scheduler, both pods can land on one
+# node and the test proves nothing. Change the names to match your nodes.
+#
+# The securityContext is there because the first apply was refused for
+# violating PodSecurity "restricted:latest". runAsUser is explicit because the
+# image runs as root.
+#
+# `oc get pod -o wide` shows the default-network address. Read the CUDN address
+# from inside the pod: `ip -4 addr show ovn-udn1`.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: geneve-a                         # default network: no primary-UDN label
+---
+apiVersion: v1
+kind: Pod
+metadata: {name: nooverlay-pod-1, namespace: nooverlay-a}
+spec:
+  nodeName: ocp-nooverlay-cp1
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1001
+    seccompProfile: {type: RuntimeDefault}
+  containers:
+    - name: tools
+      image: registry.redhat.io/rhel9/support-tools
+      command: ["sleep", "infinity"]
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities: {drop: ["ALL"]}
+---
+apiVersion: v1
+kind: Pod
+metadata: {name: nooverlay-pod-2, namespace: nooverlay-a}
+spec:
+  nodeName: ocp-nooverlay-cp2
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1001
+    seccompProfile: {type: RuntimeDefault}
+  containers:
+    - name: tools
+      image: registry.redhat.io/rhel9/support-tools
+      command: ["sleep", "infinity"]
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities: {drop: ["ALL"]}
+---
+apiVersion: v1
+kind: Pod
+metadata: {name: geneve-pod-1, namespace: geneve-a}
+spec:
+  nodeName: ocp-nooverlay-cp1
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1001
+    seccompProfile: {type: RuntimeDefault}
+  containers:
+    - name: tools
+      image: registry.redhat.io/rhel9/support-tools
+      command: ["sleep", "infinity"]
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities: {drop: ["ALL"]}
+---
+apiVersion: v1
+kind: Pod
+metadata: {name: geneve-pod-2, namespace: geneve-a}
+spec:
+  nodeName: ocp-nooverlay-cp2
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1001
+    seccompProfile: {type: RuntimeDefault}
+  containers:
+    - name: tools
+      image: registry.redhat.io/rhel9/support-tools
+      command: ["sleep", "infinity"]
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities: {drop: ["ALL"]}

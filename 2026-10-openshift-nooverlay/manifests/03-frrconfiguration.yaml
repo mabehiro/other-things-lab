@@ -1,0 +1,36 @@
+# The BGP session each node opens to spine1, the route reflector. iBGP AS 65000,
+# IPv4 unicast only.
+#
+# The neighbor is spine1's address on the nodes' PRIMARY network (VLAN 20, the
+# machine network behind br-ex). That's the layout the post ends on, and the one
+# that round-trips with no host settings changed. The first build peered over a
+# second NIC on VLAN 30 (neighbor 192.168.30.2): east-west worked, but traffic
+# from outside the cluster didn't come back.
+#
+# toReceive is required. Without it each node rejects the other nodes' pod /24s
+# reflected by spine1, and east-west falls to the default route with no error.
+#
+# `oc apply` warns that disableMP is deprecated. It's kept as in the docs' own
+# example.
+apiVersion: frrk8s.metallb.io/v1beta1
+kind: FRRConfiguration
+metadata:
+  name: nooverlay-fabric-peering
+  namespace: openshift-frr-k8s
+  labels:
+    network: nooverlay-a                 # selected by 04-routeadvertisements.yaml
+spec:
+  bgp:
+    routers:
+      - asn: 65000
+        neighbors:
+          - address: 192.168.20.25       # spine1, on the nodes' primary network
+            asn: 65000
+            disableMP: true              # ipv4 unicast only
+            toReceive:
+              allowed:
+                mode: filtered
+                prefixes:
+                  - prefix: 192.168.52.0/22
+                    ge: 24
+                    le: 24

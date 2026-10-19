@@ -1,0 +1,36 @@
+# Two pods on network B, pinned like A's: -1 on cp1, -2 on cp2. So the
+# isolation test has A and B on the SAME node (cp1) and on DIFFERENT nodes.
+# Same image and securityContext as 05-test-pods.yaml.
+apiVersion: v1
+kind: Pod
+metadata: {name: nooverlay-b-pod-1, namespace: nooverlay-b}
+spec:
+  nodeName: ocp-nooverlay-cp1
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1001
+    seccompProfile: {type: RuntimeDefault}
+  containers:
+    - name: tools
+      image: registry.redhat.io/rhel9/support-tools
+      command: ["sleep", "infinity"]
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities: {drop: ["ALL"]}
+---
+apiVersion: v1
+kind: Pod
+metadata: {name: nooverlay-b-pod-2, namespace: nooverlay-b}
+spec:
+  nodeName: ocp-nooverlay-cp2
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1001
+    seccompProfile: {type: RuntimeDefault}
+  containers:
+    - name: tools
+      image: registry.redhat.io/rhel9/support-tools
+      command: ["sleep", "infinity"]
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities: {drop: ["ALL"]}

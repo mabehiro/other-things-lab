@@ -1,0 +1,152 @@
+# The three nodes. Each has two NICs:
+#   VLAN 20  192.168.20.51-.53  the machine network, behind br-ex. Default route.
+#   VLAN 30  192.168.30.49-.51  the first build's BGP NIC. No default route.
+#
+# The final layout peers over VLAN 20 only (manifests/03), so the VLAN 30 NIC
+# carries no NoOverlay traffic. It was left in place, not removed. Whether a node
+# with no second NIC at all behaves the same was not tested.
+#
+# Only one NIC gets a default route. Two default routes make BGP peering flap in
+# a way that looks like a neighbour problem.
+#
+# The interface names below were a guess for virtio on q35. On these VMs the
+# NICs came up as enp6s18 and enp6s19, and the addresses still applied, because
+# the MAC is what binds each block to a NIC.
+apiVersion: v1beta1
+kind: AgentConfig
+metadata:
+  name: ocp-nooverlay
+
+# rendezvousIP is cp1's management address.
+rendezvousIP: 192.168.20.51
+
+hosts:
+  - hostname: ocp-nooverlay-cp1
+    role: master
+    interfaces:
+      - name: enp1s0
+        macAddress: 52:54:00:00:20:51
+      - name: enp2s0
+        macAddress: 52:54:00:00:30:49
+    rootDeviceHints:
+      deviceName: /dev/sda
+    networkConfig:
+      interfaces:
+        - name: enp1s0
+          type: ethernet
+          state: up
+          ipv4:
+            enabled: true
+            dhcp: false
+            address:
+              - ip: 192.168.20.51
+                prefix-length: 24
+          ipv6:
+            enabled: false
+        - name: enp2s0
+          type: ethernet
+          state: up
+          ipv4:
+            enabled: true
+            dhcp: false
+            address:
+              - ip: 192.168.30.49
+                prefix-length: 24
+          ipv6:
+            enabled: false
+      dns-resolver:
+        config:
+          server:
+            - 192.168.10.1
+      routes:
+        config:
+          - destination: 0.0.0.0/0
+            next-hop-address: 192.168.20.1
+            next-hop-interface: enp1s0
+            table-id: 254
+  - hostname: ocp-nooverlay-cp2
+    role: master
+    interfaces:
+      - name: enp1s0
+        macAddress: 52:54:00:00:20:52
+      - name: enp2s0
+        macAddress: 52:54:00:00:30:50
+    rootDeviceHints:
+      deviceName: /dev/sda
+    networkConfig:
+      interfaces:
+        - name: enp1s0
+          type: ethernet
+          state: up
+          ipv4:
+            enabled: true
+            dhcp: false
+            address:
+              - ip: 192.168.20.52
+                prefix-length: 24
+          ipv6:
+            enabled: false
+        - name: enp2s0
+          type: ethernet
+          state: up
+          ipv4:
+            enabled: true
+            dhcp: false
+            address:
+              - ip: 192.168.30.50
+                prefix-length: 24
+          ipv6:
+            enabled: false
+      dns-resolver:
+        config:
+          server:
+            - 192.168.10.1
+      routes:
+        config:
+          - destination: 0.0.0.0/0
+            next-hop-address: 192.168.20.1
+            next-hop-interface: enp1s0
+            table-id: 254
+  - hostname: ocp-nooverlay-cp3
+    role: master
+    interfaces:
+      - name: enp1s0
+        macAddress: 52:54:00:00:20:53
+      - name: enp2s0
+        macAddress: 52:54:00:00:30:51
+    rootDeviceHints:
+      deviceName: /dev/sda
+    networkConfig:
+      interfaces:
+        - name: enp1s0
+          type: ethernet
+          state: up
+          ipv4:
+            enabled: true
+            dhcp: false
+            address:
+              - ip: 192.168.20.53
+                prefix-length: 24
+          ipv6:
+            enabled: false
+        - name: enp2s0
+          type: ethernet
+          state: up
+          ipv4:
+            enabled: true
+            dhcp: false
+            address:
+              - ip: 192.168.30.51
+                prefix-length: 24
+          ipv6:
+            enabled: false
+      dns-resolver:
+        config:
+          server:
+            - 192.168.10.1
+      routes:
+        config:
+          - destination: 0.0.0.0/0
+            next-hop-address: 192.168.20.1
+            next-hop-interface: enp1s0
+            table-id: 254

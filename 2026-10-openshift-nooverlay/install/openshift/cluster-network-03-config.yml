@@ -1,0 +1,24 @@
+# Goes in <install dir>/openshift/ before `openshift-install agent create image`.
+# Not manifests/: the agent installer silently ignores a manifest there. After
+# the image is built, openshift/ is empty, which shows the file was read.
+#
+# BGP (FRR) and route advertisements from day 0. Both are prerequisites for a
+# NoOverlay CUDN.
+#
+# Deliberately absent: `transport: NoOverlay` for the default network. Only the
+# CUDN uses NoOverlay, so the cluster has both paths side by side. A NoOverlay
+# default network can only be chosen at install time.
+#
+# Also absent: gatewayConfig. The cluster runs the default shared gateway mode.
+apiVersion: operator.openshift.io/v1
+kind: Network
+metadata:
+  name: cluster
+spec:
+  additionalRoutingCapabilities:
+    providers:
+      - FRR
+  defaultNetwork:
+    type: OVNKubernetes
+    ovnKubernetesConfig:
+      routeAdvertisements: Enabled

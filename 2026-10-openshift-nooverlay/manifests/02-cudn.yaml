@@ -1,0 +1,34 @@
+# NoOverlay network A: a Layer3 CUDN whose pod traffic leaves the node as plain
+# IP, with no Geneve header.
+#
+# spec is immutable, and switching an existing network between overlay and
+# no-overlay is not supported. A wrong value means delete and recreate.
+#
+# The subnet must be a masked network address. Layer3 doesn't validate it: an
+# unaligned /22 is accepted and then silently masked.
+#
+# The 4.22 docs show a `noOverlayOptions` block here. On 4.22.11 with
+# TechPreviewNoUpgrade the field does not exist, so the CUDN carries
+# `transport` only. `oc explain clusteruserdefinednetwork.spec.network` shows
+# what your build has.
+#
+# No `mtu`: the pod MTU stayed at the default 1400. Whether a NoOverlay CUDN
+# accepts 1500 was not tested.
+apiVersion: k8s.ovn.org/v1
+kind: ClusterUserDefinedNetwork
+metadata:
+  name: cudn-nooverlay-a
+  labels:
+    network: nooverlay-a                 # selected by 04-routeadvertisements.yaml
+spec:
+  namespaceSelector:
+    matchLabels:
+      udn-nooverlay: a
+  network:
+    topology: Layer3                     # NoOverlay is Layer3 only
+    layer3:
+      role: Primary
+      subnets:
+        - cidr: 192.168.52.0/22          # one /24 per node
+          hostSubnet: 24
+    transport: "NoOverlay"

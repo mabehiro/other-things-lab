@@ -1,0 +1,29 @@
+# The BGP config for network B: the same neighbor as 03, with B's prefixes.
+#
+# A separate object, not an edit to 03, so removing B leaves A untouched.
+# FRR-K8s merged the two on the one neighbor without resetting the sessions:
+# each node's session went from 1 prefix to 2.
+#
+# The neighbor must match 03's, or the nodes open a second session.
+apiVersion: frrk8s.metallb.io/v1beta1
+kind: FRRConfiguration
+metadata:
+  name: nooverlay-b-fabric-peering
+  namespace: openshift-frr-k8s
+  labels:
+    network: nooverlay-b                 # selected by 09-routeadvertisements-b.yaml
+spec:
+  bgp:
+    routers:
+      - asn: 65000
+        neighbors:
+          - address: 192.168.20.25       # spine1, the same neighbor as 03
+            asn: 65000
+            disableMP: true              # the same as 03, so the merge has nothing to conflict on
+            toReceive:
+              allowed:
+                mode: filtered
+                prefixes:
+                  - prefix: 192.168.56.0/22
+                    ge: 24
+                    le: 24

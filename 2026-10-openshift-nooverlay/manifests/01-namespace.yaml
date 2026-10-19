@@ -1,0 +1,12 @@
+# The namespace for NoOverlay network A.
+#
+# The primary-UDN label must be present when the namespace is CREATED. It is
+# enforced on update only, so adding it later with `oc label` is denied and the
+# namespace can never host a primary network.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nooverlay-a
+  labels:
+    udn-nooverlay: a                                  # selected by 02-cudn.yaml
+    k8s.ovn.org/primary-user-defined-network: ""

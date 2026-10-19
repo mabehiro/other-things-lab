@@ -1,0 +1,20 @@
+# Advertise network B's per-node /24s. A twin of 04.
+# No targetVRF, so B lands in the same default table as A. That's the point of
+# the isolation test.
+apiVersion: k8s.ovn.org/v1
+kind: RouteAdvertisements
+metadata:
+  name: advertise-nooverlay-b
+spec:
+  nodeSelector: {}
+  frrConfigurationSelector:
+    matchLabels:
+      network: nooverlay-b
+  networkSelectors:
+    - networkSelectionType: ClusterUserDefinedNetworks
+      clusterUserDefinedNetworkSelector:
+        networkSelector:
+          matchLabels:
+            network: nooverlay-b
+  advertisements:
+    - PodNetwork

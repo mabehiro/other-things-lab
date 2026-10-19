@@ -1,0 +1,15 @@
+                     spine1  (BGP route reflector, AS 65000)
+                ens18 192.168.30.2      ens19 192.168.20.25
+                     │ VLAN 30               │ VLAN 20
+                     │                       │  iBGP, IPv4 unicast
+     leaf1, leaf2 ───┘          ┌────────────┼────────────┐
+  (earlier posts' fabric)       │            │            │
+                               cp1          cp2          cp3
+                         .20.51 br-ex  .20.52 br-ex  .20.53 br-ex
+
+  Pod networks, advertised as one /24 per node:
+    A  cudn-nooverlay-a  192.168.52.0/22   cp1 .54  cp2 .52  cp3 .53
+    B  cudn-nooverlay-b  192.168.56.0/22   cp1 .58  cp2 .56  cp3 .57
+
+  Each node also has a VLAN 30 NIC (192.168.30.49-.51). In this layout it
+  carries no NoOverlay traffic.
