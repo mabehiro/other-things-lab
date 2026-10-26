@@ -10,6 +10,3 @@
   Pod networks, advertised as one /24 per node:
     A  cudn-nooverlay-a  192.168.52.0/22   cp1 .54  cp2 .52  cp3 .53
     B  cudn-nooverlay-b  192.168.56.0/22   cp1 .58  cp2 .56  cp3 .57
-
-  Each node also has a VLAN 30 NIC (192.168.30.49-.51). In this layout it
-  carries no NoOverlay traffic.
